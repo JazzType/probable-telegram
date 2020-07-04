@@ -1,0 +1,5 @@
+---
+Checks: '-clang-analyzer-osx*,cppcoreguidelines-*,modernize-*,misc-*,performance-*,readability-*,google-*'
+WarningsAsErrors: '*'
+HeaderFilterRegex: ''
+FormatStyle: 'Google'
