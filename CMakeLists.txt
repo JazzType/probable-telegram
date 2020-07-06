@@ -7,6 +7,13 @@ include(cmake/PreventInSourceBuilds.cmake)
 
 add_executable(wbxml src/main.cc)
 
+find_package(Boost 1.71.0 COMPONENTS program_options filesystem REQUIRED) 
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS}) 
+    target_link_libraries(wbxml ${Boost_LIBRARIES})
+endif()
+
 if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
   option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
   if(ENABLE_BUILD_WITH_TIME_TRACE)
