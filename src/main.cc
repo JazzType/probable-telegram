@@ -34,6 +34,8 @@ void decoder(const std::string& file_path) {
   std::vector<char> bytes(length);
   // Read bytes and store in a vector
   input_fd.read(bytes.data(), length);
+  // Convert char to unsigned char
+  std::vector<unsigned char> new_bytes(bytes.begin(), bytes.end());
   // TODO(call_library_decoder): Call the decoder by passing the vector of bytes
 }
 
