@@ -1,43 +1,39 @@
 #include <bits/c++config.h>
+#include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/value_semantic.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/filesystem.hpp>
 #include <cstdint>
 #include <cstdlib>
+#include <cstddef>
 #include <fstream>
 #include <ios>
 #include <iostream>
-#include <iterator>
 #include <string>
 #include <vector>
 
 namespace po = boost::program_options;
-namespace fl = boost::filesystem;
+namespace fs = boost::filesystem;
 
-void throw_error(const std::string& message) {
+void raise_error(const char* message) {
   std::cerr << message << std::endl;
   exit(EXIT_FAILURE);
 }
 
 void decoder(const std::string& file_path) {
-  std::ifstream input_fd;
-  std::vector<unsigned char> bytes;
-  // Open the file
-  input_fd.open(file_path, std::ios::in | std::ios::binary);
+  std::ifstream input_fd(file_path, std::ios::in | std::ios::binary);
   // Check if the file was read correctly
   if (input_fd.fail()) {
-    throw_error("There was an error opening the file");
+    raise_error("There was an error opening the file");
   }
+  // Get the length of the file in bytes
+  std::uintmax_t length = fs::file_size(file_path);
+  std::vector<char> bytes(length);
   // Read bytes and store in a vector
-  while (!input_fd.eof()) {
-    unsigned char byte;
-    input_fd >> byte;
-    bytes.push_back(byte);
-  }
+  input_fd.read(bytes.data(), length);
   // TODO(call_library_decoder): Call the decoder by passing the vector of bytes
 }
 
@@ -47,11 +43,11 @@ void encoder(const std::string& file_path) {
 
 auto main(int argc, char* argv[]) -> int {
   // Variables to store the flags and the input and output paths
-  bool encode;
-  bool decode;
+  bool encode = false;
+  bool decode = false;
   std::string file_path;
   std::string output_path;
-  bool nwa;
+  bool nwa = false;
 
   // Describe the schema
   po::options_description desc("Allowed options");
@@ -70,25 +66,23 @@ auto main(int argc, char* argv[]) -> int {
 
   // Exclusive OR to restrict the program to either encoding or decoding
   if (!(encode ^ decode)) {
-    throw_error("Either encode or decode option to be given");
+    raise_error("Either encode or decode option to be given");
   }
 
   // Check if the input file exists and is indeed a file
-  if (fl::exists(file_path)) {
-    if (!fl::is_regular_file(file_path)) {
-      throw_error("Given input is not a file");
-    }
-  } else  {
-    throw_error("Given input file doesn't exist");
+  if (fs::exists(file_path) && !fs::is_regular_file(file_path)) {
+      raise_error("Given input is not a file");
+  }
+  if (!fs::exists(file_path)) {
+    raise_error("Given input file doesn't exist");
   }
 
   // Check if the output directory exists and is indeed a directory
-  if (fl::exists(output_path)) {
-    if (!fl::is_directory(output_path)) {
-      throw_error("Given output is not a directory");
-    }
-  } else {
-    throw_error("Given output directory doesn't exist");
+  if (fs::exists(output_path) && !fs::is_directory(output_path)) {
+    raise_error("Given output is not a directory");
+  }
+  if (!fs::exists(output_path)) {
+    raise_error("Given output directory doesn't exist");
   }
 
   if (encode) {
