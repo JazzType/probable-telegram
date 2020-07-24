@@ -67,7 +67,7 @@ auto main(int argc, char* argv[]) -> int {
   po::notify(vm);
 
   // Exclusive OR to restrict the program to either encoding or decoding
-  if (!(encode ^ decode)) {
+  if ((encode ^ decode) == 0) {
     raise_error("Either encode or decode option to be given");
   }
 
